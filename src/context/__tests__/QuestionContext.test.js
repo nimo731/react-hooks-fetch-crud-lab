@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { QuestionProvider, useQuestionContext } from '../QuestionContext';
 import * as api from '../../utils/api';
 
@@ -8,13 +9,13 @@ jest.mock('../../utils/api');
 const TestComponent = () => {
   const { questions, loading, error } = useQuestionContext();
   
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) return <div data-testid="loading">Loading...</div>;
+  if (error) return <div data-testid="error">Error: {error}</div>;
   
   return (
     <div>
       {questions.map(q => (
-        <div key={q.id}>{q.prompt}</div>
+        <div key={q.id} data-testid="question">{q.prompt}</div>
       ))}
     </div>
   );
@@ -35,10 +36,16 @@ describe('QuestionContext', () => {
       </QuestionProvider>
     );
 
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    // Check loading state
+    expect(screen.getByTestId('loading')).toBeInTheDocument();
     
-    await screen.findByText('Test question');
-    expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+    // Wait for questions to load
+    await waitFor(() => {
+      expect(screen.getByTestId('question')).toHaveTextContent('Test question');
+    });
+
+    // Verify loading is gone
+    expect(screen.queryByTestId('loading')).not.toBeInTheDocument();
   });
 
   test('should handle error state', async () => {
@@ -51,7 +58,10 @@ describe('QuestionContext', () => {
       </QuestionProvider>
     );
 
-    await screen.findByText(`Error: ${error.message}`);
+    // Wait for error to appear
+    await waitFor(() => {
+      expect(screen.getByTestId('error')).toHaveTextContent(`Error: ${error.message}`);
+    });
   });
 
   test('should throw error when used outside provider', () => {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 function QuestionForm({ onAddQuestion }) {
   const [formData, setFormData] = useState({
@@ -9,6 +9,15 @@ function QuestionForm({ onAddQuestion }) {
     answer4: "",
     correctIndex: 0,
   });
+
+  // Add cleanup flag
+  const [mounted, setMounted] = useState(true);
+
+  useEffect(() => {
+    return () => {
+      setMounted(false);
+    };
+  }, []);
 
   function handleChange(event) {
     setFormData({
@@ -40,15 +49,17 @@ function QuestionForm({ onAddQuestion }) {
     })
       .then((r) => r.json())
       .then((newQuestion) => {
-        onAddQuestion(newQuestion);
-        setFormData({
-          prompt: "",
-          answer1: "",
-          answer2: "",
-          answer3: "",
-          answer4: "",
-          correctIndex: 0,
-        });
+        if (mounted) {
+          onAddQuestion(newQuestion);
+          setFormData({
+            prompt: "",
+            answer1: "",
+            answer2: "",
+            answer3: "",
+            answer4: "",
+            correctIndex: 0,
+          });
+        }
       });
   }
 
