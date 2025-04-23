@@ -1,0 +1,18 @@
+.error-container {
+  background-color: #ffebee;
+  border: 1px solid #ffcdd2;
+  border-radius: 4px;
+  padding: 16px;
+  margin: 16px 0;
+  color: #c62828;
+}
+
+.error-container h3 {
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+.error-container p {
+  margin: 0;
+  font-size: 14px;
+} 
